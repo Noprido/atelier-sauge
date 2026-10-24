@@ -1,0 +1,114 @@
+<%
+  const v = (k) => (form.values && form.values[k]) || '';
+  const e = (k) => (form.errors && form.errors[k]) || '';
+  const hasErrors = form.errorList.length > 0;
+  const field = (k) => (e(k) ? ' field--error' : '');
+  const desc = (k, hint) => [hint, e(k) ? 'err-' + k : ''].filter(Boolean).join(' ');
+%>
+<form id="reservation-form" class="form" method="post" action="/reservations#reservation" data-has-errors="<%= hasErrors ? '1' : '0' %>">
+  <% if (hasErrors) { %>
+  <div id="form-errors" class="form-errors" role="alert" tabindex="-1">
+    <p><strong>La demande n’a pas été envoyée.</strong> Corrigez les champs suivants :</p>
+    <ul>
+      <% form.errorList.forEach((item) => { %>
+      <li><a href="#<%= item.field === 'formula' ? 'formula' : item.field %>"><%= item.message %></a></li>
+      <% }) %>
+    </ul>
+  </div>
+  <% } %>
+
+  <div class="field<%= field('formula') %>">
+    <label for="formula">Prestation et durée</label>
+    <select id="formula" name="formula" required aria-invalid="<%= e('formula') ? 'true' : 'false' %>"<% if (desc('formula')) { %> aria-describedby="<%= desc('formula') %>"<% } %>>
+      <option value="" <%= v('formula') ? '' : 'selected' %> disabled>Choisir une prestation</option>
+      <% form.groups.forEach((g) => { %>
+      <optgroup label="<%= g.name %>">
+        <% g.options.forEach((o) => { %>
+        <option value="<%= o.value %>" <%= v('formula') === o.value ? 'selected' : '' %>><%= o.label %></option>
+        <% }) %>
+      </optgroup>
+      <% }) %>
+    </select>
+    <% if (e('formula')) { %><p class="field__error" id="err-formula"><%= e('formula') %></p><% } %>
+  </div>
+
+  <div class="form__row">
+    <div class="field<%= field('date') %>">
+      <label for="date">Date souhaitée</label>
+      <input id="date" name="date" type="date" required min="<%= form.minDate %>" max="<%= form.maxDate %>" value="<%= v('date') %>" aria-invalid="<%= e('date') ? 'true' : 'false' %>" aria-describedby="<%= desc('date', 'hint-date') %>">
+      <p class="field__hint" id="hint-date">Au moins <%= site.booking.leadHours %> h à l’avance.</p>
+      <% if (e('date')) { %><p class="field__error" id="err-date"><%= e('date') %></p><% } %>
+    </div>
+    <div class="field<%= field('time') %>">
+      <label for="time">Heure d’arrivée souhaitée</label>
+      <select id="time" name="time" required aria-invalid="<%= e('time') ? 'true' : 'false' %>"<% if (desc('time')) { %> aria-describedby="<%= desc('time') %>"<% } %>>
+        <option value="" <%= v('time') ? '' : 'selected' %> disabled>Choisir</option>
+        <% form.slots.forEach((s) => { %>
+        <option value="<%= s %>" <%= v('time') === s ? 'selected' : '' %>><%= fmtTime(s) %></option>
+        <% }) %>
+      </select>
+      <% if (e('time')) { %><p class="field__error" id="err-time"><%= e('time') %></p><% } %>
+    </div>
+  </div>
+
+  <div class="field<%= field('name') %>">
+    <label for="name">Nom et prénom</label>
+    <input id="name" name="name" type="text" required minlength="2" maxlength="100" autocomplete="name" value="<%= v('name') %>" aria-invalid="<%= e('name') ? 'true' : 'false' %>"<% if (desc('name')) { %> aria-describedby="<%= desc('name') %>"<% } %>>
+    <% if (e('name')) { %><p class="field__error" id="err-name"><%= e('name') %></p><% } %>
+  </div>
+
+  <div class="form__row">
+    <div class="field<%= field('email') %>">
+      <label for="email">Adresse e-mail</label>
+      <input id="email" name="email" type="email" required maxlength="254" autocomplete="email" value="<%= v('email') %>" aria-invalid="<%= e('email') ? 'true' : 'false' %>"<% if (desc('email')) { %> aria-describedby="<%= desc('email') %>"<% } %>>
+      <% if (e('email')) { %><p class="field__error" id="err-email"><%= e('email') %></p><% } %>
+    </div>
+    <div class="field<%= field('phone') %>">
+      <label for="phone">Téléphone</label>
+      <input id="phone" name="phone" type="tel" required maxlength="25" autocomplete="tel" inputmode="tel" value="<%= v('phone') %>" aria-invalid="<%= e('phone') ? 'true' : 'false' %>"<% if (desc('phone')) { %> aria-describedby="<%= desc('phone') %>"<% } %>>
+      <% if (e('phone')) { %><p class="field__error" id="err-phone"><%= e('phone') %></p><% } %>
+    </div>
+  </div>
+
+  <div class="field<%= field('address') %>">
+    <label for="address">Adresse d’intervention</label>
+    <input id="address" name="address" type="text" required minlength="5" maxlength="200" autocomplete="street-address" value="<%= v('address') %>" aria-invalid="<%= e('address') ? 'true' : 'false' %>"<% if (desc('address')) { %> aria-describedby="<%= desc('address') %>"<% } %>>
+    <% if (e('address')) { %><p class="field__error" id="err-address"><%= e('address') %></p><% } %>
+  </div>
+
+  <div class="form__row form__row--narrow">
+    <div class="field<%= field('postalCode') %>">
+      <label for="postalCode">Code postal</label>
+      <input id="postalCode" name="postalCode" type="text" required inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="postal-code" value="<%= v('postalCode') %>" aria-invalid="<%= e('postalCode') ? 'true' : 'false' %>"<% if (desc('postalCode')) { %> aria-describedby="<%= desc('postalCode') %>"<% } %>>
+      <% if (e('postalCode')) { %><p class="field__error" id="err-postalCode"><%= e('postalCode') %></p><% } %>
+    </div>
+    <div class="field<%= field('city') %>">
+      <label for="city">Ville</label>
+      <input id="city" name="city" type="text" required minlength="2" maxlength="80" autocomplete="address-level2" value="<%= v('city') %>" aria-invalid="<%= e('city') ? 'true' : 'false' %>"<% if (desc('city')) { %> aria-describedby="<%= desc('city') %>"<% } %>>
+      <% if (e('city')) { %><p class="field__error" id="err-city"><%= e('city') %></p><% } %>
+    </div>
+  </div>
+
+  <div class="field<%= field('comment') %>">
+    <label for="comment">Message ou précisions <span class="field__opt">(facultatif)</span></label>
+    <textarea id="comment" name="comment" rows="4" maxlength="500" aria-describedby="<%= desc('comment', 'hint-comment') %>"><%= v('comment') %></textarea>
+    <p class="field__hint" id="hint-comment">Étage, code d’accès, attentes particulières… 500 caractères maximum. Ne communiquez pas d’informations de santé détaillées.</p>
+    <% if (e('comment')) { %><p class="field__error" id="err-comment"><%= e('comment') %></p><% } %>
+  </div>
+
+  <div class="field field--check<%= field('consent') %>">
+    <input id="consent" name="consent" type="checkbox" required <%= v('consent') ? 'checked' : '' %> aria-invalid="<%= e('consent') ? 'true' : 'false' %>"<% if (desc('consent')) { %> aria-describedby="<%= desc('consent') %>"<% } %>>
+    <label for="consent">J’accepte que mes données soient utilisées pour traiter ma demande, conformément à la <a href="/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</label>
+    <% if (e('consent')) { %><p class="field__error" id="err-consent"><%= e('consent') %></p><% } %>
+  </div>
+
+  <!-- Champs anti-spam : ne pas remplir -->
+  <div class="hp" aria-hidden="true">
+    <label for="website">Ne pas remplir ce champ</label>
+    <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+  </div>
+  <input type="hidden" name="ts" value="<%= form.ts %>">
+
+  <button class="btn btn--primary btn--block" type="submit">Envoyer ma demande</button>
+  <p class="form__note">Envoyer cette demande ne confirme pas le rendez-vous : nous vous répondons après vérification de la disponibilité et de votre adresse.</p>
+</form>

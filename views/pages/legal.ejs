@@ -1,0 +1,56 @@
+<%
+  const L = site.legal;
+  const c = site.contact;
+%>
+<article class="section page container page--narrow legal">
+  <% if (L.draftNotice) { %>
+  <p class="notice">Texte modèle : à relire, compléter et faire valider avant la mise en ligne. Les passages entre crochets sont à renseigner.</p>
+  <% } %>
+
+  <% if (page === 'mentions') { %>
+  <h1>Mentions légales</h1>
+  <h2>Éditeur du site</h2>
+  <p><%= L.companyName %> — <%= L.legalForm %><br>SIRET : <%= L.siret %><br>Adresse : <%= L.address %><br>Contact : <%= c.email %><% if (c.phone) { %> — <%= c.phone %><% } %></p>
+  <p>Directeur de la publication : <%= L.publisher %></p>
+  <h2>Hébergeur</h2>
+  <p><%= L.host.name %> — <%= L.host.address %></p>
+  <h2>Propriété intellectuelle</h2>
+  <p>Les textes, visuels et éléments de ce site sont protégés. Toute reproduction sans autorisation préalable est interdite.</p>
+  <h2>Nature des prestations</h2>
+  <p>Les massages proposés sont des prestations de bien-être. Ils n’ont pas de visée thérapeutique et ne remplacent pas un avis ou un suivi médical.</p>
+
+  <% } else if (page === 'confidentialite') { %>
+  <h1>Politique de confidentialité</h1>
+  <h2>Responsable du traitement</h2>
+  <p><%= L.companyName %>, <%= L.address %>. Contact : <%= c.email %>.</p>
+  <h2>Données collectées</h2>
+  <p>Lorsque vous envoyez une demande de réservation, nous collectons : votre nom, votre adresse e-mail, votre numéro de téléphone, votre adresse d’intervention, la date et l’heure souhaitées, la prestation choisie et le message facultatif que vous rédigez.</p>
+  <h2>Finalités et base légale</h2>
+  <p>Ces données servent uniquement à étudier votre demande, vous contacter, organiser le déplacement et assurer le suivi de la prestation (mesures précontractuelles prises à votre demande). Elles ne sont ni vendues ni utilisées à des fins publicitaires.</p>
+  <h2>Destinataires</h2>
+  <p>Vos données sont accessibles au praticien et aux prestataires techniques strictement nécessaires (hébergement, envoi des e-mails).</p>
+  <h2>Durée de conservation</h2>
+  <p><%= L.retention %></p>
+  <h2>Vos droits</h2>
+  <p>Vous pouvez demander l’accès, la rectification, l’effacement, la limitation ou la portabilité de vos données, et vous opposer à leur traitement, en écrivant à <%= c.email %>. Vous pouvez aussi introduire une réclamation auprès de la CNIL (cnil.fr).</p>
+  <h2>Cookies</h2>
+  <p>Ce site n’utilise aucun cookie de suivi, de mesure d’audience ou de publicité. Un cookie de session technique est utilisé uniquement dans l’espace d’administration réservé au praticien.</p>
+  <h2>Données sensibles</h2>
+  <p>Merci de ne pas indiquer d’informations de santé détaillées dans le formulaire. Si un point de santé est important pour la séance, nous en discuterons directement avec vous.</p>
+
+  <% } else { %>
+  <h1>Conditions de réservation</h1>
+  <h2>Demande et confirmation</h2>
+  <p>Le formulaire du site permet d’envoyer une demande de rendez-vous. Cette demande ne constitue pas une réservation ferme : le rendez-vous n’est confirmé qu’après vérification de la disponibilité, de l’adresse et du tarif, et validation explicite par nos soins.</p>
+  <h2>Tarifs et frais de déplacement</h2>
+  <p>Les tarifs affichés concernent la prestation seule. Le tarif final et les éventuels frais de déplacement vous sont communiqués avant la confirmation.</p>
+  <h2>Paiement</h2>
+  <p><%= L.payment %></p>
+  <h2>Annulation et retard</h2>
+  <p><%= L.cancellation %></p>
+  <h2>Conditions de la séance</h2>
+  <p>La séance a lieu à l’adresse indiquée, dans un espace calme et suffisamment dégagé. Le praticien peut refuser ou interrompre une séance en cas de comportement inapproprié ou si les conditions de sécurité ne sont pas réunies.</p>
+  <% } %>
+
+  <p><a class="btn btn--ghost" href="/">Retour à l’accueil</a></p>
+</article>

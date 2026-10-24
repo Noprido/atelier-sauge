@@ -1,0 +1,26 @@
+{
+  "name": "projet-massage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site vitrine de massage à domicile avec demandes de réservation et espace administrateur protégé",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js",
+    "hash-password": "node scripts/hash-password.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "memorystore": "^1.6.7",
+    "nodemailer": "^6.9.16"
+  }
+}

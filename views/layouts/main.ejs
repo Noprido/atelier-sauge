@@ -1,0 +1,50 @@
+<%
+  const isAdminPage = locals.area === 'admin';
+  const pageTitle = locals.title || site.business.name;
+  const pageDesc = locals.description || site.business.description;
+  const hideFromIndex = isAdminPage || locals.noindex;
+%><!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= pageTitle %></title>
+  <meta name="description" content="<%= pageDesc %>">
+  <meta name="theme-color" content="#3E5A4B">
+<% if (hideFromIndex) { %>
+  <meta name="robots" content="noindex, nofollow">
+<% } else { %>
+  <link rel="canonical" href="<%= siteUrl + (locals.canonicalPath || '/') %>">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="<%= site.business.name %>">
+  <meta property="og:title" content="<%= pageTitle %>">
+  <meta property="og:description" content="<%= pageDesc %>">
+  <meta property="og:url" content="<%= siteUrl + (locals.canonicalPath || '/') %>">
+<% if (site.business.ogImage) { %>
+  <meta property="og:image" content="<%= siteUrl + site.business.ogImage %>">
+<% } %>
+<% } %>
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Young+Serif&amp;display=swap">
+  <link rel="stylesheet" href="/css/style.css">
+<% if (isAdminPage) { %>
+  <link rel="stylesheet" href="/css/admin.css">
+  <meta name="csrf-token" content="<%= locals.csrfToken || '' %>">
+<% } %>
+  <script src="/js/init.js"></script>
+</head>
+<body class="<%= isAdminPage ? 'is-admin' : 'is-public' %>">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+<% if (!isAdminPage) { %>
+  <%- include('../partials/header') %>
+<% } %>
+  <main id="contenu" tabindex="-1"><%- body %></main>
+<% if (!isAdminPage) { %>
+  <%- include('../partials/footer') %>
+<% } %>
+  <script src="<%= isAdminPage ? '/js/admin.js' : '/js/main.js' %>" defer></script>
+</body>
+</html>

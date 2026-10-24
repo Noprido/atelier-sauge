@@ -1,0 +1,195 @@
+<%
+  const lowest = (s) => Math.min.apply(null, s.durations.map((d) => d.price));
+  const c = site.contact;
+  const socials = (site.socials || []).filter((s) => s.url);
+  const waLink = c.whatsapp ? 'https://wa.me/' + String(c.whatsapp).replace(/\D/g, '') : '';
+  const tgLink = c.telegram ? 'https://t.me/' + String(c.telegram).replace(/^@/, '') : '';
+  const telLink = c.phone ? 'tel:' + String(c.phone).replace(/[^\d+]/g, '') : '';
+%>
+<section class="hero container" id="accueil">
+  <div class="hero__text">
+    <h1><%= site.hero.title %></h1>
+    <p class="lead"><%= site.hero.text %></p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="#reservation">Réserver un massage</a>
+      <a class="btn btn--ghost" href="#tarifs">Voir les tarifs</a>
+    </div>
+    <ul class="assurances">
+      <% site.hero.assurances.forEach((a) => { %><li><%= a %></li><% }) %>
+    </ul>
+  </div>
+  <div class="hero__art" aria-hidden="true">
+    <svg viewBox="0 0 320 380" xmlns="http://www.w3.org/2000/svg" focusable="false">
+      <ellipse cx="160" cy="338" rx="130" ry="12" fill="#232826" opacity=".08"/>
+      <ellipse class="stone stone--1" cx="160" cy="300" rx="122" ry="46" fill="#3E5A4B"/>
+      <ellipse class="stone stone--2" cx="148" cy="240" rx="92" ry="36" fill="#D6CBB4"/>
+      <ellipse class="stone stone--3" cx="166" cy="190" rx="66" ry="27" fill="#7C957F"/>
+      <ellipse class="stone stone--4" cx="157" cy="150" rx="44" ry="19" fill="#E8E1D1"/>
+      <ellipse class="stone stone--5" cx="163" cy="121" rx="25" ry="12" fill="#A4573C"/>
+    </svg>
+  </div>
+</section>
+
+<section class="section section--sand" id="prestations" aria-labelledby="prestations-title">
+  <div class="container">
+    <div class="section__head">
+      <h2 id="prestations-title">Prestations</h2>
+      <p>Chaque séance a lieu chez vous. Choisissez la prestation qui correspond à votre besoin du moment.</p>
+    </div>
+    <div class="offers">
+      <% site.services.forEach((s) => { const first = s.durations[0]; const value = s.id + ':' + first.minutes; %>
+      <article class="offer">
+        <div class="offer__body">
+          <h3><%= s.name %></h3>
+          <p><%= s.description %></p>
+          <p class="offer__goal"><%= s.goal %></p>
+        </div>
+        <div class="offer__side">
+          <p class="offer__meta"><%= s.durations.length > 1 ? 'Durées' : 'Durée' %> : <%= s.durations.map((d) => d.minutes + ' min').join(', ') %></p>
+          <p class="offer__price">À partir de <strong><%= eur(lowest(s)) %></strong></p>
+          <a class="btn btn--primary" href="/?formula=<%= encodeURIComponent(value) %>#reservation" data-formula="<%= value %>">Choisir cette prestation</a>
+        </div>
+      </article>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="tarifs" aria-labelledby="tarifs-title">
+  <div class="container">
+    <div class="section__head">
+      <h2 id="tarifs-title">Tarifs</h2>
+      <p><%= site.pricing.intro %></p>
+    </div>
+    <div class="table-wrap">
+      <table class="prices">
+        <caption class="sr-only">Tarifs par prestation et par durée</caption>
+        <thead>
+          <tr>
+            <th scope="col">Prestation</th>
+            <th scope="col">Durée</th>
+            <th scope="col">Tarif</th>
+            <th scope="col"><span class="sr-only">Réservation</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% site.services.forEach((s) => { s.durations.forEach((d) => { const value = s.id + ':' + d.minutes; %>
+          <tr>
+            <th scope="row"><%= s.name %></th>
+            <td data-label="Durée"><%= d.minutes %> min</td>
+            <td data-label="Tarif"><strong><%= eur(d.price) %></strong></td>
+            <td class="prices__action"><a class="btn btn--ghost btn--sm" href="/?formula=<%= encodeURIComponent(value) %>#reservation" data-formula="<%= value %>">Réserver<span class="sr-only"> : <%= s.name %>, <%= d.minutes %> minutes</span></a></td>
+          </tr>
+          <% }) }) %>
+        </tbody>
+      </table>
+    </div>
+    <div class="pricing-notes">
+      <ul>
+        <% site.pricing.notes.forEach((n) => { %><li><%= n %></li><% }) %>
+      </ul>
+      <aside class="travel">
+        <h3><%= site.travel.title %></h3>
+        <p><%= site.travel.text %></p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section section--sand" id="a-propos" aria-labelledby="apropos-title">
+  <div class="container about">
+    <div>
+      <h2 id="apropos-title">À propos</h2>
+      <p class="about__name"><%= site.about.name %></p>
+      <% site.about.paragraphs.forEach((p) => { %><p><%= p %></p><% }) %>
+    </div>
+    <% if (site.about.qualifications && site.about.qualifications.length) { %>
+    <div class="about__quals">
+      <h3>Formation et qualifications</h3>
+      <ul>
+        <% site.about.qualifications.forEach((q) => { %><li><%= q %></li><% }) %>
+      </ul>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<section class="section" id="pourquoi" aria-labelledby="pourquoi-title">
+  <div class="container">
+    <div class="section__head">
+      <h2 id="pourquoi-title">Pourquoi se faire masser à domicile</h2>
+    </div>
+    <dl class="why">
+      <% site.whyUs.forEach((w) => { %>
+      <div class="why__item">
+        <dt><%= w.title %></dt>
+        <dd><%= w.text %></dd>
+      </div>
+      <% }) %>
+    </dl>
+  </div>
+</section>
+
+<section class="section section--sand" id="deroulement" aria-labelledby="deroulement-title">
+  <div class="container">
+    <div class="section__head">
+      <h2 id="deroulement-title">Comment se déroule une demande</h2>
+      <p>Du formulaire à la confirmation, en six étapes.</p>
+    </div>
+    <ol class="steps">
+      <% site.steps.forEach((s) => { %>
+      <li>
+        <h3><%= s.title %></h3>
+        <p><%= s.text %></p>
+      </li>
+      <% }) %>
+    </ol>
+  </div>
+</section>
+
+<section class="section section--sage" id="reservation" aria-labelledby="reservation-title">
+  <div class="container booking">
+    <div class="booking__intro">
+      <h2 id="reservation-title">Demander un rendez-vous</h2>
+      <p>Renseignez le formulaire : nous vérifions la disponibilité et votre adresse, puis nous vous répondons pour confirmer.</p>
+      <ul class="booking__points">
+        <li>Aucun paiement n’est demandé en ligne.</li>
+        <li>Le créneau n’est réservé qu’après notre confirmation.</li>
+        <li>Vous recevez un e-mail récapitulatif avec votre référence.</li>
+      </ul>
+    </div>
+    <div class="booking__panel">
+      <%- include('../partials/reservation-form') %>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" aria-labelledby="faq-title">
+  <div class="container faq">
+    <h2 id="faq-title">Questions fréquentes</h2>
+    <div class="faq__list">
+      <% site.faq.forEach((item) => { %>
+      <details>
+        <summary><%= item.q %></summary>
+        <p><%= item.a %></p>
+      </details>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--sand" id="contact" aria-labelledby="contact-title">
+  <div class="container contact">
+    <div>
+      <h2 id="contact-title">Nous contacter</h2>
+      <p>Une question avant de réserver ? Écrivez-nous, nous répondons dès que possible.</p>
+    </div>
+    <ul class="contact__list">
+      <% if (c.email) { %><li><a class="btn btn--ghost" href="mailto:<%= c.email %>">Écrire un e-mail</a></li><% } %>
+      <% if (telLink) { %><li><a class="btn btn--ghost" href="<%= telLink %>">Appeler <%= c.phone %></a></li><% } %>
+      <% if (waLink) { %><li><a class="btn btn--ghost" href="<%= waLink %>" target="_blank" rel="noopener noreferrer">WhatsApp</a></li><% } %>
+      <% if (tgLink) { %><li><a class="btn btn--ghost" href="<%= tgLink %>" target="_blank" rel="noopener noreferrer">Telegram</a></li><% } %>
+      <% socials.forEach((s) => { %><li><a class="btn btn--ghost" href="<%= s.url %>" target="_blank" rel="noopener noreferrer"><%= s.label %></a></li><% }) %>
+    </ul>
+  </div>
+</section>

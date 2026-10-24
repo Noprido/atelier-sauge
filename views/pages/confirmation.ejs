@@ -1,0 +1,19 @@
+<section class="section page container page--narrow">
+  <h1>Demande bien reçue</h1>
+  <p class="lead">Merci. Votre demande est enregistrée, mais <strong>le rendez-vous n’est pas encore confirmé</strong>.</p>
+  <% if (ref) { %>
+  <p class="ref">Votre référence : <strong><%= ref %></strong></p>
+  <% } %>
+  <% if (mailSent) { %>
+  <p>Un e-mail récapitulatif vient de vous être envoyé. Pensez à vérifier vos courriers indésirables.</p>
+  <% } else { %>
+  <p>L’e-mail récapitulatif n’a pas pu être envoyé. Votre demande est bien enregistrée : conservez votre référence et attendez notre réponse, ou contactez-nous.</p>
+  <% } %>
+  <h2>Et maintenant ?</h2>
+  <ol class="steps steps--compact">
+    <li><h3>Nous vérifions</h3><p>Disponibilité, adresse, tarif final et frais de déplacement éventuels.</p></li>
+    <li><h3>Nous vous répondons</h3><p>Par e-mail ou par téléphone, avec les modalités de paiement.</p></li>
+    <li><h3>Le rendez-vous est confirmé</h3><p>Seulement après notre validation explicite.</p></li>
+  </ol>
+  <p><a class="btn btn--primary" href="/">Retour à l’accueil</a></p>
+</section>

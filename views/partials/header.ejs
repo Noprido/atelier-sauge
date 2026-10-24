@@ -1,0 +1,26 @@
+<%
+  const socialLinks = (site.socials || []).filter((s) => s.url);
+%>
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="/#accueil">
+      <span class="brand__name"><%= site.business.name %></span>
+      <span class="brand__tag"><%= site.business.tagline %></span>
+    </a>
+    <a class="btn btn--primary btn--sm site-header__cta" href="/#reservation">Réserver</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="nav" aria-label="Navigation principale">
+      <ul>
+        <li><a href="/#accueil">Accueil</a></li>
+        <li><a href="/#prestations">Prestations</a></li>
+        <li><a href="/#tarifs">Tarifs</a></li>
+        <li><a href="/#a-propos">À propos</a></li>
+        <li><a href="/#faq">Questions fréquentes</a></li>
+        <li><a href="/#contact">Contact</a></li>
+        <% socialLinks.forEach((s) => { %>
+        <li class="nav__social"><a href="<%= s.url %>" target="_blank" rel="noopener noreferrer"><%= s.label %></a></li>
+        <% }) %>
+      </ul>
+    </nav>
+  </div>
+</header>

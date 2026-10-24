@@ -1,0 +1,15 @@
+<section class="login">
+  <div class="login__panel">
+    <h1>Administration</h1>
+    <p><%= site.business.name %> — accès réservé.</p>
+    <% if (error) { %><p class="login__error" role="alert"><%= error %></p><% } %>
+    <form method="post" action="/admin/login">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" maxlength="200" autofocus>
+      </div>
+      <button class="btn btn--primary btn--block" type="submit">Se connecter</button>
+    </form>
+  </div>
+</section>

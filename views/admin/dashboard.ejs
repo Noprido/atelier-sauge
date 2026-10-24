@@ -1,0 +1,68 @@
+<header class="admin-bar">
+  <div class="admin-wrap admin-bar__inner">
+    <div>
+      <p class="admin-bar__site"><%= site.business.name %></p>
+      <h1>Demandes de réservation</h1>
+    </div>
+    <form method="post" action="/admin/logout">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn btn--ghost btn--sm" type="submit">Se déconnecter</button>
+    </form>
+  </div>
+</header>
+
+<div class="admin-wrap admin-body">
+  <% if (reservations.length === 0) { %>
+  <p class="empty">Aucune demande pour le moment. Les nouvelles demandes apparaîtront ici.</p>
+  <% } else { %>
+  <div class="toolbar">
+    <div class="field">
+      <label for="search">Rechercher</label>
+      <input id="search" type="search" placeholder="Nom, e-mail, téléphone, ville, référence" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="sort">Trier par</label>
+      <select id="sort">
+        <option value="recent">Demandes les plus récentes</option>
+        <option value="oldest">Demandes les plus anciennes</option>
+        <option value="appt">Rendez-vous le plus proche</option>
+        <option value="status">Statut</option>
+      </select>
+    </div>
+  </div>
+  <p id="count" class="count" aria-live="polite"><%= reservations.length %> demande<%= reservations.length > 1 ? 's' : '' %> affichée<%= reservations.length > 1 ? 's' : '' %> sur <%= reservations.length %></p>
+  <p id="status-live" class="sr-only" role="status" aria-live="polite"></p>
+  <p id="no-results" class="empty" hidden>Aucune demande ne correspond à cette recherche.</p>
+
+  <div id="requests" class="requests">
+    <% reservations.forEach((r) => { %>
+    <article class="req req--<%= r.status %>" data-id="<%= r.id %>" data-status="<%= r.status %>" data-created="<%= r.createdAt %>" data-appt="<%= r.appointment.date %>T<%= r.appointment.time %>" data-search="<%= [r.id, r.customer.name, r.customer.email, r.customer.phone, r.address.city, r.address.postalCode, r.service.name].join(' ') %>">
+      <header class="req__head">
+        <h2><%= r.service.name %> <span class="req__duration">(<%= r.duration.minutes %> min)</span></h2>
+        <span class="badge badge--<%= r.status %>"><%= statuses[r.status] || r.status %></span>
+      </header>
+      <p class="req__when"><%= fmtDate(r.appointment.date) %> à <%= fmtTime(r.appointment.time) %></p>
+      <dl class="req__details">
+        <div><dt>Client</dt><dd><%= r.customer.name %></dd></div>
+        <div><dt>E-mail</dt><dd><a href="mailto:<%= r.customer.email %>"><%= r.customer.email %></a></dd></div>
+        <div><dt>Téléphone</dt><dd><a href="tel:<%= r.customer.phone %>"><%= r.customer.phone %></a></dd></div>
+        <div><dt>Adresse</dt><dd><%= r.address.street %>, <%= r.address.postalCode %> <%= r.address.city %></dd></div>
+        <div><dt>Tarif indicatif</dt><dd><%= eur(r.duration.price) %></dd></div>
+        <% if (r.comment) { %><div><dt>Message</dt><dd class="req__comment"><%= r.comment %></dd></div><% } %>
+        <div><dt>Reçue le</dt><dd><%= fmtDateTime(r.createdAt, site.business.timezone) %> — réf. <%= r.id %></dd></div>
+      </dl>
+      <form class="status-form" method="post" action="/admin/reservations/<%= r.id %>/status">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="status-<%= r.id %>">Statut</label>
+        <select id="status-<%= r.id %>" name="status">
+          <% Object.keys(statuses).forEach((key) => { %>
+          <option value="<%= key %>" <%= r.status === key ? 'selected' : '' %>><%= statuses[key] %></option>
+          <% }) %>
+        </select>
+        <noscript><button class="btn btn--primary btn--sm" type="submit">Enregistrer</button></noscript>
+      </form>
+    </article>
+    <% }) %>
+  </div>
+  <% } %>
+</div>

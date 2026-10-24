@@ -1,0 +1,5 @@
+<section class="section page container page--narrow">
+  <h1><%= locals.title || 'Une erreur est survenue' %></h1>
+  <p class="lead"><%= locals.message || 'Une erreur est survenue. Réessayez dans quelques instants.' %></p>
+  <p><a class="btn btn--primary" href="<%= locals.backHref || '/' %>"><%= locals.backLabel || 'Retour à l’accueil' %></a></p>
+</section>
