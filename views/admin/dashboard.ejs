@@ -1,12 +1,18 @@
+<%
+  const counts = { all: reservations.length };
+  Object.keys(statuses).forEach((k) => { counts[k] = reservations.filter((r) => r.status === k).length; });
+  const chipLabels = { nouvelle: 'Nouvelles', en_cours: 'En cours', confirmee: 'Confirmées', refusee: 'Refusées' };
+  const mapsUrl = (r) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(r.address.street + ', ' + r.address.postalCode + ' ' + r.address.city);
+%>
 <header class="admin-bar">
   <div class="admin-wrap admin-bar__inner">
     <div>
       <p class="admin-bar__site"><%= site.business.name %></p>
-      <h1>Demandes de réservation</h1>
+      <h1>Demandes</h1>
     </div>
     <form method="post" action="/admin/logout">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button class="btn btn--ghost btn--sm" type="submit">Se déconnecter</button>
+      <button class="btn btn--ghost btn--sm" type="submit">Déconnexion</button>
     </form>
   </div>
 </header>
@@ -15,6 +21,13 @@
   <% if (reservations.length === 0) { %>
   <p class="empty">Aucune demande pour le moment. Les nouvelles demandes apparaîtront ici.</p>
   <% } else { %>
+  <div class="filters" role="group" aria-label="Filtrer par statut">
+    <button type="button" class="chip is-active" data-filter="all" aria-pressed="true">Toutes <span class="chip__n"><%= counts.all %></span></button>
+    <% Object.keys(statuses).forEach((k) => { %>
+    <button type="button" class="chip" data-filter="<%= k %>" aria-pressed="false"><%= chipLabels[k] || statuses[k] %> <span class="chip__n"><%= counts[k] %></span></button>
+    <% }) %>
+  </div>
+
   <div class="toolbar">
     <div class="field">
       <label for="search">Rechercher</label>
@@ -30,30 +43,41 @@
       </select>
     </div>
   </div>
+
   <p id="count" class="count" aria-live="polite"><%= reservations.length %> demande<%= reservations.length > 1 ? 's' : '' %> affichée<%= reservations.length > 1 ? 's' : '' %> sur <%= reservations.length %></p>
-  <p id="status-live" class="sr-only" role="status" aria-live="polite"></p>
   <p id="no-results" class="empty" hidden>Aucune demande ne correspond à cette recherche.</p>
 
   <div id="requests" class="requests">
     <% reservations.forEach((r) => { %>
     <article class="req req--<%= r.status %>" data-id="<%= r.id %>" data-status="<%= r.status %>" data-created="<%= r.createdAt %>" data-appt="<%= r.appointment.date %>T<%= r.appointment.time %>" data-search="<%= [r.id, r.customer.name, r.customer.email, r.customer.phone, r.address.city, r.address.postalCode, r.service.name].join(' ') %>">
       <header class="req__head">
-        <h2><%= r.service.name %> <span class="req__duration">(<%= r.duration.minutes %> min)</span></h2>
+        <div>
+          <h2><%= r.customer.name %></h2>
+          <p class="req__service"><%= r.service.name %>, <%= r.duration.minutes %> min, <%= eur(r.duration.price) %></p>
+        </div>
         <span class="badge badge--<%= r.status %>"><%= statuses[r.status] || r.status %></span>
       </header>
+
       <p class="req__when"><%= fmtDate(r.appointment.date) %> à <%= fmtTime(r.appointment.time) %></p>
+      <p class="req__where"><%= r.address.street %>, <%= r.address.postalCode %> <%= r.address.city %></p>
+
+      <div class="req__actions">
+        <a class="btn btn--ghost" href="tel:<%= r.customer.phone %>">Appeler</a>
+        <a class="btn btn--ghost" href="mailto:<%= r.customer.email %>">E-mail</a>
+        <a class="btn btn--ghost" href="<%= mapsUrl(r) %>" target="_blank" rel="noopener noreferrer">Itinéraire</a>
+      </div>
+
+      <% if (r.comment) { %><p class="req__comment"><%= r.comment %></p><% } %>
+
       <dl class="req__details">
-        <div><dt>Client</dt><dd><%= r.customer.name %></dd></div>
-        <div><dt>E-mail</dt><dd><a href="mailto:<%= r.customer.email %>"><%= r.customer.email %></a></dd></div>
         <div><dt>Téléphone</dt><dd><a href="tel:<%= r.customer.phone %>"><%= r.customer.phone %></a></dd></div>
-        <div><dt>Adresse</dt><dd><%= r.address.street %>, <%= r.address.postalCode %> <%= r.address.city %></dd></div>
-        <div><dt>Tarif indicatif</dt><dd><%= eur(r.duration.price) %></dd></div>
-        <% if (r.comment) { %><div><dt>Message</dt><dd class="req__comment"><%= r.comment %></dd></div><% } %>
-        <div><dt>Reçue le</dt><dd><%= fmtDateTime(r.createdAt, site.business.timezone) %> — réf. <%= r.id %></dd></div>
+        <div><dt>E-mail</dt><dd><a href="mailto:<%= r.customer.email %>"><%= r.customer.email %></a></dd></div>
+        <div><dt>Reçue le</dt><dd><%= fmtDateTime(r.createdAt, site.business.timezone) %>, réf. <%= r.id %></dd></div>
       </dl>
+
       <form class="status-form" method="post" action="/admin/reservations/<%= r.id %>/status">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <label for="status-<%= r.id %>">Statut</label>
+        <label for="status-<%= r.id %>">Statut de la demande</label>
         <select id="status-<%= r.id %>" name="status">
           <% Object.keys(statuses).forEach((key) => { %>
           <option value="<%= key %>" <%= r.status === key ? 'selected' : '' %>><%= statuses[key] %></option>
@@ -64,5 +88,6 @@
     </article>
     <% }) %>
   </div>
+  <p id="toast" class="toast" role="status" aria-live="polite"></p>
   <% } %>
 </div>

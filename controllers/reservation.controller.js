@@ -70,14 +70,23 @@ async function create(req, res, next) {
     }
 
     const body = req.body || {};
-    const elapsed = Date.now() - Number(body.ts);
-    const looksLikeBot = (typeof body.website === 'string' && body.website.trim() !== '') || !Number.isFinite(elapsed) || elapsed < 2000;
-    if (looksLikeBot) {
-      // Réponse neutre : on ne renseigne pas les robots
+
+    // Champ piège rempli : réponse neutre, on ne renseigne pas les robots
+    if (typeof body.hp_check === 'string' && body.hp_check.trim() !== '') {
+      console.warn('[réservation] demande ignorée : champ piège rempli');
       return res.redirect(303, '/confirmation');
     }
 
     const { errors, values, data } = validateReservation(body, site);
+
+    // Envoi trop rapide : on ne simule pas un succès, on invite à renvoyer
+    const elapsed = Date.now() - Number(body.ts);
+    if (!Number.isFinite(elapsed) || elapsed < 2000) {
+      console.warn('[réservation] demande refusée : envoi trop rapide (' + elapsed + ' ms)');
+      errors.form = 'Votre demande a été envoyée trop vite. Vérifiez vos informations puis renvoyez-la.';
+      return res.renderPage('pages/home', homeLocals({ values, errors }), 422);
+    }
+
     if (!data) {
       return res.renderPage('pages/home', homeLocals({ values, errors }), 422);
     }

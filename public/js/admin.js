@@ -5,16 +5,19 @@
   if (!grid) return;
 
   var cards = Array.prototype.slice.call(grid.querySelectorAll('.req'));
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
   var search = document.getElementById('search');
   var sort = document.getElementById('sort');
   var count = document.getElementById('count');
   var empty = document.getElementById('no-results');
-  var live = document.getElementById('status-live');
+  var toast = document.getElementById('toast');
   var metaCsrf = document.querySelector('meta[name="csrf-token"]');
   var csrf = metaCsrf ? metaCsrf.getAttribute('content') : '';
   var total = cards.length;
+  var activeFilter = 'all';
   var STATUS_CLASSES = ['nouvelle', 'en_cours', 'confirmee', 'refusee'];
   var ORDER = { nouvelle: 0, en_cours: 1, confirmee: 2, refusee: 3 };
+  var toastTimer;
 
   function norm(s) {
     return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -56,7 +59,9 @@
     var q = norm(search.value.trim());
     var visible = 0;
     cards.forEach(function (c) {
-      var show = !q || c._search.indexOf(q) !== -1;
+      var okStatus = activeFilter === 'all' || c.getAttribute('data-status') === activeFilter;
+      var okText = !q || c._search.indexOf(q) !== -1;
+      var show = okStatus && okText;
       c.hidden = !show;
       if (show) visible++;
     });
@@ -64,10 +69,37 @@
     empty.hidden = visible !== 0;
   }
 
+  function refreshCounts() {
+    var counts = { all: cards.length, nouvelle: 0, en_cours: 0, confirmee: 0, refusee: 0 };
+    cards.forEach(function (c) { counts[c.getAttribute('data-status')]++; });
+    chips.forEach(function (chip) {
+      var n = chip.querySelector('.chip__n');
+      if (n) n.textContent = counts[chip.getAttribute('data-filter')];
+    });
+  }
+
+  function say(msg, isError) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.toggle('toast--error', Boolean(isError));
+    toast.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('is-visible'); }, 3500);
+  }
+
   if (search) search.addEventListener('input', applyFilter);
   if (sort) sort.addEventListener('change', applySort);
-
-  function say(msg) { if (live) live.textContent = msg; }
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      activeFilter = chip.getAttribute('data-filter');
+      chips.forEach(function (c) {
+        var on = c === chip;
+        c.classList.toggle('is-active', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      applyFilter();
+    });
+  });
 
   // Changement de statut sans rechargement
   grid.addEventListener('change', function (e) {
@@ -75,14 +107,13 @@
     if (!sel) return;
     var card = sel.closest('.req');
     var previous = card.getAttribute('data-status');
-    var wanted = sel.value;
     sel.disabled = true;
 
     fetch(sel.form.action, {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': csrf },
-      body: JSON.stringify({ status: wanted })
+      body: JSON.stringify({ status: sel.value })
     })
       .then(function (res) {
         if (res.status === 401 || res.status === 403) { window.location.href = '/admin/login'; throw new Error('auth'); }
@@ -98,14 +129,15 @@
         card.classList.add('req--' + data.status);
         card.setAttribute('data-status', data.status);
         if (badge) { badge.classList.add('badge--' + data.status); badge.textContent = data.label; }
-        say('Statut mis à jour : ' + data.label);
+        refreshCounts();
+        applyFilter();
         if (sort && sort.value === 'status') applySort();
+        say('Statut mis à jour : ' + data.label);
       })
       .catch(function (err) {
         if (err && err.message === 'auth') return;
         sel.value = previous;
-        say('Le statut n’a pas pu être modifié. Rechargez la page puis réessayez.');
-        window.alert('Le statut n’a pas pu être modifié. Rechargez la page puis réessayez.');
+        say('Le statut n’a pas pu être modifié. Rechargez la page puis réessayez.', true);
       })
       .then(function () { sel.disabled = false; });
   });
